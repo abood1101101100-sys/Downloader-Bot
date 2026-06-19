@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1.7
-
 FROM python:3.14-slim AS builder
 
 ENV TZ=UTC \
@@ -12,9 +10,7 @@ ENV TZ=UTC \
 
 WORKDIR /app
 
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \
       gcc \
       build-essential \
       libffi-dev \
@@ -25,14 +21,10 @@ RUN python -m venv "$VIRTUAL_ENV"
 
 COPY requirements.txt ./
 
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -U pip setuptools wheel && \
+RUN pip install -U pip setuptools wheel && \
     pip install -r requirements.txt
 
 FROM python:3.14-slim
-# Pin to a digest for reproducible builds:
-#   docker pull python:3.14-slim && docker inspect --format='{{index .RepoDigests 0}}' python:3.14-slim
-#   Then use: FROM python:3.14-slim@sha256:...
 
 ENV TZ=UTC \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -42,9 +34,7 @@ ENV TZ=UTC \
 
 WORKDIR /app
 
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \
       ffmpeg \
     && rm -rf /var/lib/apt/lists/* \
     && addgroup --system appgroup \
