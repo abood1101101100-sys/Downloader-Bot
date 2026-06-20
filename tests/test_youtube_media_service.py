@@ -1,3 +1,4 @@
+
 from pathlib import Path
 
 import pytest
@@ -122,3 +123,34 @@ def test_build_ytdlp_youtube_options_skips_missing_default_cookies_file(monkeypa
     options = build_ytdlp_youtube_options(skip_download=True)
 
     assert "cookiefile" not in options
+
+
+def test_build_ytdlp_youtube_options_includes_bgutil_http_base_url(monkeypatch):
+    monkeypatch.setenv("YTDLP_BGUTIL_HTTP_BASE_URL", "http://bgutil-provider:4416")
+    monkeypatch.delenv("YTDLP_BGUTIL_DISABLE_INNERTUBE", raising=False)
+
+    options = build_ytdlp_youtube_options(skip_download=True)
+
+    bgutil_args = options["extractor_args"]["youtubepot-bgutilhttp"]
+    assert bgutil_args["base_url"] == ["http://bgutil-provider:4416"]
+    assert "disable_innertube" not in bgutil_args
+
+
+def test_build_ytdlp_youtube_options_bgutil_disable_innertube_flag(monkeypatch):
+    monkeypatch.setenv("YTDLP_BGUTIL_HTTP_BASE_URL", "http://bgutil-provider:4416")
+    monkeypatch.setenv("YTDLP_BGUTIL_DISABLE_INNERTUBE", "true")
+
+    options = build_ytdlp_youtube_options(skip_download=True)
+
+    bgutil_args = options["extractor_args"]["youtubepot-bgutilhttp"]
+    assert bgutil_args["disable_innertube"] == ["1"]
+
+
+def test_build_ytdlp_youtube_options_without_bgutil_env_omits_provider_args(monkeypatch):
+    monkeypatch.delenv("YTDLP_BGUTIL_HTTP_BASE_URL", raising=False)
+    monkeypatch.delenv("YTDLP_YOUTUBE_PLAYER_CLIENT", raising=False)
+    monkeypatch.delenv("YTDLP_YOUTUBE_PO_TOKEN", raising=False)
+
+    options = build_ytdlp_youtube_options(skip_download=True)
+
+    assert "extractor_args" not in options
