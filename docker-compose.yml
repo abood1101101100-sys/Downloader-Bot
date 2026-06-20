@@ -1,15 +1,24 @@
 services:
+  bgutil-provider:
+    image: brainicism/bgutil-ytdlp-pot-provider:latest
+    container_name: bgutil-provider
+    restart: on-failure:5
+
   downloader-bot:
     image: ghcr.io/mak5er/downloader-bot:latest
     pull_policy: always
     build:
       context: .
       dockerfile: Dockerfile
+    depends_on:
+      - bgutil-provider
     volumes:
       - downloader_downloads:/app/downloads
       - downloader_log:/app/logs
       - ./cookies:/app/cookies
     env_file: .env
+    environment:
+      - YTDLP_BGUTIL_HTTP_BASE_URL=http://bgutil-provider:4416
     container_name: downloader-bot
     restart: on-failure:5
     healthcheck:
