@@ -105,9 +105,14 @@ def _read_float_env(name: str, *, required: bool = False, aliases: tuple[str, ..
 BOT_TOKEN = _read_env("BOT_TOKEN", required=True)
 DATABASE_URL = _read_env("DATABASE_URL", required=True)
 ADMIN_ID = _read_int_env("ADMIN_ID", required=True, aliases=("admin_id",))
-CUSTOM_API_URL = _validate_custom_api_url(
-    _read_env("CUSTOM_API_URL", required=True, aliases=("custom_api_url",)) or "", "CUSTOM_API_URL"
-)
+_custom_api_url_raw = _read_env("CUSTOM_API_URL", aliases=("custom_api_url",))
+if _custom_api_url_raw:
+    CUSTOM_API_URL = _validate_custom_api_url(_custom_api_url_raw, "CUSTOM_API_URL")
+else:
+    # Falls back to the official Telegram Bot API when no Local Bot API Server
+    # is configured. Note: the official API caps file uploads/downloads at 50MB,
+    # while a Local Bot API Server raises that limit to 2GB.
+    CUSTOM_API_URL = "https://api.telegram.org"
 MEASUREMENT_ID = _read_env("MEASUREMENT_ID")
 API_SECRET = _read_env("API_SECRET")
 CHANNEL_ID = _read_env("CHANNEL_ID")
