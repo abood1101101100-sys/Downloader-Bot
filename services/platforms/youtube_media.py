@@ -115,6 +115,12 @@ def build_ytdlp_youtube_options(**overrides: Any) -> dict[str, Any]:
 
     if extractor_args:
         options["extractor_args"] = extractor_args
+        logging.info("yt-dlp extractor_args resolved: %s", extractor_args)
+    else:
+        logging.info(
+            "yt-dlp extractor_args empty (YTDLP_BGUTIL_HTTP_BASE_URL=%r)",
+            os.getenv("YTDLP_BGUTIL_HTTP_BASE_URL"),
+        )
 
     remote_components = os.getenv("YTDLP_YOUTUBE_REMOTE_COMPONENTS")
     if remote_components and remote_components.strip():
