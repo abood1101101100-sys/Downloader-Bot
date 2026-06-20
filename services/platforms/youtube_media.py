@@ -105,6 +105,14 @@ def build_ytdlp_youtube_options(**overrides: Any) -> dict[str, Any]:
     po_token = os.getenv("YTDLP_YOUTUBE_PO_TOKEN")
     if po_token and po_token.strip():
         extractor_args.setdefault("youtube", {})["po_token"] = _split_env_list(po_token)
+
+    bgutil_base_url = os.getenv("YTDLP_BGUTIL_HTTP_BASE_URL")
+    if bgutil_base_url and bgutil_base_url.strip():
+        bgutil_args = extractor_args.setdefault("youtubepot-bgutilhttp", {})
+        bgutil_args["base_url"] = [bgutil_base_url.strip()]
+        if os.getenv("YTDLP_BGUTIL_DISABLE_INNERTUBE", "").strip().lower() in ("1", "true", "yes"):
+            bgutil_args["disable_innertube"] = ["1"]
+
     if extractor_args:
         options["extractor_args"] = extractor_args
 
